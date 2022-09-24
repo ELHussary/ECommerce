@@ -1,15 +1,10 @@
-import React from "react";
-import shipping from "@/assets/svg/actions/shipping.svg";
-import cashondelivery from "@/assets/svg/actions/cashondelivery.svg";
-
-const cache: string[] = [];
-
-function importAll(r: any) {
-  r.keys().forEach((key: any) => (cache[key] = r(key)));
-}
-
-importAll(require.context("/assets/svg/payments", false, /\.(png|jpe?g|svg)$/));
-const images = Object.entries(cache).map((module: any) => module[1].default);
+import React from 'react'
+import shipping from '@/assets/svg/actions/shipping.svg'
+import cashondelivery from '@/assets/svg/actions/cashondelivery.svg'
+import Importimages from '@/hooks/Importimages'
+const Images = Importimages(
+  require.context('@/assets/svg/payments', false, /\.(png|jpe?g|svg)$/),
+)
 
 const Payment = () => {
   return (
@@ -28,12 +23,12 @@ const Payment = () => {
 
       <div className="py-4 flex gap-3 items-center flex-wrap">
         <p className="text-sm text-gray-500">Payment method:</p>
-        {images.map((image) => (
-          <img className="w-9" src={image.src} alt={image} />
+        {Images.map(image => (
+          <img className="w-9" src={image} alt={image} />
         ))}
       </div>
     </>
-  );
-};
+  )
+}
 
-export default Payment;
+export default Payment

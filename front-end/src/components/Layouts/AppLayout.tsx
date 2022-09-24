@@ -1,16 +1,26 @@
 import Navigation from '@/components/Layouts/Navigation'
 import { useAuth } from '@/hooks/auth'
+import Head from 'next/head'
 
 const AppLayout = ({ children }: { children: any }) => {
-  const { user } = useAuth({ middleware: 'guest' })
+  const { user } = useAuth({ middleware: 'auth' })
+
+  if (!user)
+    return (
+      <>
+        <Head>
+          <title>Laravel</title>
+        </Head>
+      </>
+    )
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <>
       <Navigation user={user} />
 
       {/* Page Content */}
-      <main>{children}</main>
-    </div>
+      {children}
+    </>
   )
 }
 

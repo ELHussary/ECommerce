@@ -3,7 +3,6 @@ import axios from '@/lib/axios'
 import { useEffect } from 'react'
 import { useRouter } from 'next/router'
 
-
 interface IUseAuth {
   middleware: string
   redirectIfAuthenticated?: any
@@ -11,14 +10,13 @@ interface IUseAuth {
 
 interface IApiRequest {
   setErrors: React.Dispatch<React.SetStateAction<never[]>>
-  setStatus: React.Dispatch<React.SetStateAction<any|null>>
+  setStatus: React.Dispatch<React.SetStateAction<any | null>>
   [key: string]: any
 }
 
-export const useAuth = (config: IUseAuth) => {
+export const useAuth = (config?: IUseAuth) => {
   const router = useRouter()
-  const {middleware, redirectIfAuthenticated} = config || {}
-
+  const { middleware, redirectIfAuthenticated } = config || {}
 
   const { data: user, error, mutate } = useSWR('/api/user', () =>
     axios
@@ -33,18 +31,18 @@ export const useAuth = (config: IUseAuth) => {
 
   const csrf = () => axios.get('/sanctum/csrf-cookie')
 
-  const register = async ({ data, ...props }: { data: Props }) => {
+  const register = async (args: IApiRequest) => {
+    const { setErrors, ...props } = args
     await csrf()
 
-    data.setErrors([])
+    setErrors([])
 
     axios
       .post('/register', props)
       .then(() => mutate())
       .catch(error => {
         if (error.response.status !== 422) throw error
-
-        data.setErrors(error.response.data.errors)
+        setErrors(error.response.data.errors)
       })
   }
 
@@ -53,7 +51,7 @@ export const useAuth = (config: IUseAuth) => {
 
     await csrf()
 
-   setErrors([])
+    setErrors([])
     setStatus(null)
 
     axios
@@ -62,48 +60,49 @@ export const useAuth = (config: IUseAuth) => {
       .catch(error => {
         if (error.response.status !== 422) throw error
 
-       setErrors(error.response.data.errors)
+        setErrors(error.response.data.errors)
       })
   }
 
-  const forgotPassword = async (data: Props) => {
+  const forgotPassword = async (args: IApiRequest) => {
+    const { setErrors, setStatus, email } = args
     await csrf()
-
-    data.setErrors([])
-    data.setStatus(null)
+    setErrors([])
+    setStatus(null)
 
     axios
-      .post('/forgot-password', { email: data.email })
-      .then(response => data.setStatus(response.data.status))
+      .post('/forgot-password', { email })
+      .then(response => setStatus(response.data.status))
       .catch(error => {
         if (error.response.status !== 422) throw error
 
-        data.setErrors(error.response.data.errors)
+        setErrors(Object.values(error.response.data.errors).flat() as never[])
       })
   }
 
-  const resetPassword = async ({ data, ...props }: { data: Props }) => {
+  const resetPassword = async (args: IApiRequest) => {
+    const { setErrors, setStatus, ...props } = args
     await csrf()
-
-    data.setErrors([])
-    data.setStatus(null)
+    setErrors([])
+    setStatus(null)
 
     axios
-      .post('/reset-password', { token: router.query.token, props })
+      .post('/reset-password', { token: router.query.token, ...props })
       .then(response =>
         router.push('/login?reset=' + btoa(response.data.status)),
       )
       .catch(error => {
         if (error.response.status !== 422) throw error
 
-        data.setErrors(error.response.data.errors)
+        setErrors(Object.values(error.response.data.errors).flat() as never[])
       })
   }
 
-  const resendEmailVerification = (data: Props) => {
+  const resendEmailVerification = (args: IApiRequest) => {
+    const { setStatus } = args
     axios
       .post('/email/verification-notification')
-      .then(response => data.setStatus(response.data.status))
+      .then(response => setStatus(response.data.status))
   }
 
   const logout = async () => {
@@ -111,7 +110,7 @@ export const useAuth = (config: IUseAuth) => {
       await axios.post('/logout').then(() => mutate())
     }
 
-    window.location.pathname = '/login'
+    window.location.pathname = '/'
   }
 
   useEffect(() => {
@@ -130,5 +129,6 @@ export const useAuth = (config: IUseAuth) => {
     resetPassword,
     resendEmailVerification,
     logout,
+    middleware,
   }
 }

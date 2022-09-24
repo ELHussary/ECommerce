@@ -1,5 +1,5 @@
-import React from "react";
-import { RiStarSFill } from "react-icons/ri";
+import React from 'react'
+import { RiStarSFill } from 'react-icons/ri'
 
 const Details = (props: any) => {
   return (
@@ -28,7 +28,7 @@ const Details = (props: any) => {
         adipisicing elit. Reprehenderit fugit nulla atque quam dolor
       </p>
     </div>
-  );
-};
+  )
+}
 
-export default Details;
+export default Details

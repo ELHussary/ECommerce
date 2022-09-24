@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.rc-slider-tooltip-inner,
+.rc-slider-track {
+  @apply bg-indigo-600 !important;
+}
+
+.rc-slider-handle {
+  @apply border-indigo-600 !important;
+}
+
+input[type='number']::-webkit-inner-spin-button {
+  opacity: 1;
+}
+
+.container {
+  @apply max-w-7xl;
+}
