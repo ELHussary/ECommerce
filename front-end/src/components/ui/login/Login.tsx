@@ -1,17 +1,13 @@
 import React, { useState } from 'react'
 import { RiCloseFill } from 'react-icons/ri'
 import ClickOutside from '@/hooks/ClickOutside'
-import { useAuth } from '@/hooks/auth'
 import InputError from '../errors/InputError'
 
+import { useMutation } from '@apollo/client'
+import { LOGIN, csrf } from '@/graphql/auth'
 const Login = (props: any) => {
   const domNode: any = ClickOutside(() => {
     props.setLogin(false)
-  })
-
-  const { login } = useAuth({
-    middleware: 'guest',
-    redirectIfAuthenticated: '/dashboard',
   })
 
   const [email, setEmail] = useState('')
@@ -20,10 +16,11 @@ const Login = (props: any) => {
   const [errors, setErrors] = useState<any>([])
   const [status, setStatus] = useState(null)
 
+  const [authLogin] = useMutation(LOGIN)
   const submitForm = async (event: any) => {
     event.preventDefault()
-
-    login({ email, password, remember: shouldRemember, setErrors, setStatus })
+    await csrf()
+    authLogin()
   }
   return (
     <section className="fixed bg-black bg-opacity-30 left-0 top-0 z-50 h-screen w-screen px-3">
@@ -50,7 +47,6 @@ const Login = (props: any) => {
                 value={email}
                 placeholder="Email address or phone number"
                 className=" w-full p-3.5 rounded-sm text-sm"
-                required
                 onChange={event => setEmail(event.target.value)}
               />
             </div>
@@ -62,7 +58,6 @@ const Login = (props: any) => {
                 value={password}
                 placeholder="Password"
                 className=" w-full p-3.5 rounded-sm text-sm"
-                required
                 onChange={event => setPassword(event.target.value)}
               />
               <InputError messages={errors.password} className="mt-2" />

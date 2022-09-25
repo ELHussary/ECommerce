@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import { CgArrowLongLeft } from 'react-icons/cg'
 import { RiCloseFill } from 'react-icons/ri'
 import ClickOutside from '@/hooks/ClickOutside'
-import { useAuth } from '@/hooks/auth'
 import InputError from '../errors/InputError'
 
 interface IEvent {
@@ -12,11 +11,6 @@ interface IEvent {
 const Register = (props: any) => {
   const domNode: any = ClickOutside(() => {
     props.setRegister(false)
-  })
-
-  const { register } = useAuth({
-    middleware: 'guest',
-    redirectIfAuthenticated: '/dashboard',
   })
 
   const [name, setName] = useState('')
@@ -32,16 +26,6 @@ const Register = (props: any) => {
 
   const submitForm = (event: IEvent) => {
     event.preventDefault()
-
-    register({
-      name,
-      email,
-      password,
-      password_confirmation: password_confirmation,
-      setErrors,
-      setStatus,
-      agree_on_Terms_and_Conditions,
-    })
   }
 
   return (

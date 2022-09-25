@@ -5,7 +5,6 @@ import Badge from '@/components/ui/badge/Badge'
 import DropdownLink, {
   DropdownButton,
 } from '@/components/ui/dropdown/DropdownLink'
-import { useAuth } from '@/hooks/auth'
 import NavLink from '@/components/NavLink'
 import { useRouter } from 'next/router'
 import React from 'react'
@@ -22,7 +21,7 @@ import Register from '../ui/register/Register'
 const Navigation = ({ user }: { user: any }) => {
   const [login, setLogin] = React.useState<boolean>(false)
   const [register, setRegister] = React.useState<boolean>(false)
-  const { logout } = useAuth()
+
   const router = useRouter()
 
   return (
@@ -95,7 +94,7 @@ const Navigation = ({ user }: { user: any }) => {
                     active={router.pathname === '/settings'}>
                     Settings
                   </DropdownLink>
-                  <DropdownButton onClick={logout}>Logout</DropdownButton>
+                  <DropdownButton>Logout</DropdownButton>
                 </Dropdown>
               )}
             </div>

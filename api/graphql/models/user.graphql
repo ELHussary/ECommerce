@@ -9,6 +9,7 @@ type User {
 extend type Query {
   users: [User!]! @all
   user(id: ID! @eq): User @find
+  me: User @guard @auth
 }
 
 type Mutation {

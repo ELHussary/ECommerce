@@ -5,6 +5,10 @@ import Importimages from '@/hooks/Importimages'
 import Link from 'next/link'
 import AppLayout from '@/components/Layouts/AppLayout'
 
+import { useQuery } from '@apollo/client'
+import me from '@/graphql/me'
+import { initializeApollo } from '@/lib/apollo'
+
 const Images = Importimages(
   require.context(`@/assets/svg/settings`, true, /\.(png|jpe?g|svg)$/),
 )
@@ -60,6 +64,12 @@ const ListItem = [
 ]
 
 const Settings: NextPage = () => {
+  const { data, error, loading } = useQuery(me)
+
+  if (loading) return <>Loading</>
+  if (error || !data) return <>Error</>
+
+  console.log(data)
   return (
     <AppLayout>
       <main className="container py-20">
@@ -75,7 +85,7 @@ const Settings: NextPage = () => {
           <section className="px-6 pb-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 items-center gap-6">
             {ListItem.map(item => {
               return (
-                <Link href={item.url}>
+                <Link href={item.url} key={item.id}>
                   <a
                     className="flex items-center border p-3 rounded-2xl gap-2.5 hover:bg-gray-50 cursor-pointer bg-white"
                     key={item.id}>
@@ -101,3 +111,12 @@ const Settings: NextPage = () => {
 }
 
 export default Settings
+
+export const getServerSideProps = async () => {
+  const apolloClient = initializeApollo()
+  await apolloClient.query({
+    query: me,
+  })
+
+  return { props: { initialApolloState: apolloClient.cache.extract() } }
+}
