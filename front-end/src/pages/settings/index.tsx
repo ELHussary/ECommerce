@@ -5,10 +5,6 @@ import Importimages from '@/hooks/Importimages'
 import Link from 'next/link'
 import AppLayout from '@/components/Layouts/AppLayout'
 
-import { useQuery } from '@apollo/client'
-import me from '@/graphql/me'
-import { initializeApollo } from '@/lib/apollo'
-
 const Images = Importimages(
   require.context(`@/assets/svg/settings`, true, /\.(png|jpe?g|svg)$/),
 )
@@ -64,12 +60,6 @@ const ListItem = [
 ]
 
 const Settings: NextPage = () => {
-  const { data, error, loading } = useQuery(me)
-
-  if (loading) return <>Loading</>
-  if (error || !data) return <>Error</>
-
-  console.log(data)
   return (
     <AppLayout>
       <main className="container py-20">
@@ -111,12 +101,3 @@ const Settings: NextPage = () => {
 }
 
 export default Settings
-
-export const getServerSideProps = async () => {
-  const apolloClient = initializeApollo()
-  await apolloClient.query({
-    query: me,
-  })
-
-  return { props: { initialApolloState: apolloClient.cache.extract() } }
-}

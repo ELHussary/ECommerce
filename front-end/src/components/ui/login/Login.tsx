@@ -3,25 +3,30 @@ import { RiCloseFill } from 'react-icons/ri'
 import ClickOutside from '@/hooks/ClickOutside'
 import InputError from '../errors/InputError'
 
-import { useMutation } from '@apollo/client'
-import { LOGIN, csrf } from '@/graphql/auth'
+import { useAuth } from '@/graphql/auth'
+import axios from '@/lib/axios'
+
 const Login = (props: any) => {
   const domNode: any = ClickOutside(() => {
     props.setLogin(false)
   })
 
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [shouldRemember, setShouldRemember] = useState(false)
+  const [email, setEmail] = useState('a@a.com')
+  const [password, setPassword] = useState('123123aA')
   const [errors, setErrors] = useState<any>([])
-  const [status, setStatus] = useState(null)
+  const [status, setStatus] = useState<any>(null)
 
-  const [authLogin] = useMutation(LOGIN)
+  const { login } = useAuth({
+    middleware: 'guest',
+    redirectIfAuthenticated: '/settings',
+  })
+
   const submitForm = async (event: any) => {
     event.preventDefault()
-    await csrf()
-    authLogin()
+
+    login({ email, password, setErrors, setStatus })
   }
+
   return (
     <section className="fixed bg-black bg-opacity-30 left-0 top-0 z-50 h-screen w-screen px-3">
       <div
@@ -69,7 +74,6 @@ const Login = (props: any) => {
                   type="checkbox"
                   name="remember"
                   className=" focus:ring-transparent rounded-sm text-indigo-600 mr-2"
-                  onChange={event => setShouldRemember(event.target.checked)}
                 />
                 <label className="text-gray-500 text-xs ">Remember me</label>
               </div>
