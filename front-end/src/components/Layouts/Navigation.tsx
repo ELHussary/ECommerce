@@ -17,12 +17,14 @@ import {
 } from 'react-icons/ri'
 import Login from '../ui/login/Login'
 import Register from '../ui/register/Register'
+import { useAuth } from '@/graphql/auth'
 
 const Navigation = ({ user }: { user: any }) => {
   const [login, setLogin] = React.useState<boolean>(false)
   const [register, setRegister] = React.useState<boolean>(false)
 
   const router = useRouter()
+  const { logout } = useAuth()
 
   return (
     <nav className="bg-white border-b border-gray-100 fixed w-full rounded-sm z-50">
@@ -34,7 +36,7 @@ const Navigation = ({ user }: { user: any }) => {
           <div className="flex">
             {/* Logo */}
             <div className="flex-shrink-0 flex items-center">
-              <Link href="/dashboard">
+              <Link href="/">
                 <a>
                   <ApplicationLogo className="block h-10 w-auto fill-current text-gray-600" />
                 </a>
@@ -94,7 +96,7 @@ const Navigation = ({ user }: { user: any }) => {
                     active={router.pathname === '/settings'}>
                     Settings
                   </DropdownLink>
-                  <DropdownButton>Logout</DropdownButton>
+                  <DropdownButton onClick={logout}>Logout</DropdownButton>
                 </Dropdown>
               )}
             </div>

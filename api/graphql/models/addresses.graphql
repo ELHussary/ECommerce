@@ -1,10 +1,36 @@
+input AddressesInput {
+    country: String @rules(apply: ["required"])
+    full_name: String @rules(apply: ["required"])
+    phone_number: String @rules(apply: ["required"])
+    street: String @rules(apply: ["required"])
+    governorate: String @rules(apply: ["required"])
+    governorateid: ID @rules(apply: ["required"])
+    city_area: String @rules(apply: ["required"])
+}
+
 type Addresses {
-  id: ID
-  country: String
-  full_name: String
-  phone_number: String
-  street: String
-  governorate: String
-  city_area: String
-  created_at: DateTime
+    id: ID!
+    country: String!
+    full_name: String!
+    phone_number: String!
+    street: String!
+    governorate: String!
+    governorateid: ID!
+    city_area: String!
+    created_at: DateTime!
+}
+
+extend type Mutation {
+    createAddress(input: AddressesInput! @spread): Addresses!
+        @create
+        @guard
+        @inject(context: "user.id", name: "user_id")
+
+    updateAddress(id: ID!, input: AddressesInput! @spread): Addresses!
+        @update
+        @can(ability: "update", find: "id")
+
+    deleteAddress(id: ID!): Addresses!
+        @delete
+        @can(ability: "delete", find: "id")
 }

@@ -1,41 +1,52 @@
-import { ApolloClient, HttpLink, InMemoryCache } from '@apollo/client'
-import getConfig from 'next/config'
+import {
+ ApolloClient,
+ ApolloLink,
+ HttpLink,
+ InMemoryCache,
+} from '@apollo/client'
 import { getCookie } from 'react-use-cookie'
-const { publicRuntimeConfig } = getConfig()
+import { useMemo } from 'react'
+
+import Pusher from 'pusher-js'
+import PusherLink from './pusher-link'
+
 const csrfToken = getCookie('XSRF-TOKEN')
 
+const httpLink = new HttpLink({
+ uri: process.env.NEXT_PUBLIC_BACKEND_URL + '/graphql',
+ headers: {
+  'X-XSRF-TOKEN': csrfToken,
+ },
+ credentials: 'include',
+})
+
+const pusherLink = new PusherLink({
+ //@ts-ignore
+ pusher: new Pusher(process.env.NEXT_PUBLIC_WEBSOCKETS_KEY, {
+  wsHost: process.env.NEXT_PUBLIC_WEBSOCKETS_SERVER,
+  wsPort: 6001,
+  forceTLS: false,
+  enableStats: true,
+
+  authEndpoint: `${process.env.NEXT_PUBLIC_BACKEND_URL}/graphql/subscriptions/auth`,
+  auth: {
+   headers: {
+    'X-XSRF-TOKEN': csrfToken,
+   },
+  },
+ }),
+})
+
 function createApolloClient() {
-  return new ApolloClient({
-    ssrMode: typeof window === 'undefined',
-    link: new HttpLink({
-      uri: process.env.NEXT_PUBLIC_BACKEND_URL + '/graphql',
-      headers: {
-        'X-XSRF-TOKEN': csrfToken,
-      },
-      credentials: 'include',
-    }),
-    cache: new InMemoryCache(),
-  })
+ return new ApolloClient({
+  ssrMode: typeof window === 'undefined',
+  //@ts-ignore
+  link: ApolloLink.from([pusherLink, httpLink]),
+  cache: new InMemoryCache(),
+ })
 }
 
-export default createApolloClient
-
-// const submitForm = async (event: any) => {
-//   event.preventDefault()
-//   await csrf()
-//   axios
-//     .post('api/login', { email: 'a@a.com', password: '123123aA' })
-//     .then(res => {
-//       axios
-//         .get('/api/user')
-//         .then(res => console.log(res.data))
-//         .catch(error => {
-//           if (error.response.status !== 409) throw error
-//         })
-//     })
-//     .catch(error => {
-//       if (error.response.status !== 422) throw error
-
-//       console.log(Object.values(error.response.data.errors).flat())
-//     })
-// }
+export function useApollo() {
+ const client = useMemo(() => createApolloClient(), [])
+ return client
+}

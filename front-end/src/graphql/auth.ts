@@ -1,8 +1,7 @@
 import axios from '@/lib/axios'
-import { useQuery } from '@apollo/client'
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
-import me from './me'
+import useSWR from 'swr'
 
 interface IUseAuth {
   middleware: string
@@ -19,7 +18,16 @@ export const useAuth = (config?: IUseAuth) => {
   const router = useRouter()
   const { middleware, redirectIfAuthenticated } = config || {}
 
-  const { data: user, error, loading } = useQuery(me)
+  const { data: user, error, mutate } = useSWR('/api/user', () =>
+    axios
+      .get('/api/user')
+      .then(res => res.data)
+      .catch(error => {
+        if (error.response.status !== 409) throw error
+
+        router.push('/verify-email')
+      }),
+  )
 
   const csrf = () => axios.get('/sanctum/csrf-cookie')
 
@@ -32,30 +40,33 @@ export const useAuth = (config?: IUseAuth) => {
     setStatus(null)
 
     axios
-      .post('api/login', props)
-      .then(res => {
-        if (res.status === 200) {
-          console.log(true)
-        }
-      })
+      .post('/api/login', props)
+      .then(() => mutate())
       .catch(error => {
         if (error.response.status !== 422) throw error
         setErrors(error.response.data.errors)
       })
   }
 
-  // useEffect(() => {
-  //   if (middleware === 'guest' && redirectIfAuthenticated && user)
-  //     router.push(redirectIfAuthenticated)
-  //   if (window.location.pathname === '/verify-email' && user?.email_verified_at)
-  //     router.push(redirectIfAuthenticated)
-  //   // if (middleware === 'auth' && error) logout()
-  // }, [user, error])
+  const logout = async () => {
+    if (!error) {
+      await axios.post('/api/logout').then(() => mutate())
+    }
+
+    window.location.pathname = '/'
+  }
+
+  useEffect(() => {
+    if (middleware === 'guest' && redirectIfAuthenticated && user)
+      router.push(redirectIfAuthenticated)
+    if (window.location.pathname === '/verify-email' && user?.email_verified_at)
+      router.push(redirectIfAuthenticated)
+    if (middleware === 'auth' && error) logout()
+  }, [user, error])
 
   return {
     user,
     login,
-    // logout,
-    middleware,
+    logout,
   }
 }

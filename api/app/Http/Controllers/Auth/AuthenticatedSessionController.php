@@ -18,4 +18,9 @@ class AuthenticatedSessionController extends Controller
             return response()->json(['errors' => ['email' => ['These credentials do not match our records.']]], 422);
         }
     }
+
+    public function destroy()
+    {
+        auth()->guard()->logout();
+    }
 }

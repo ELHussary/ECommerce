@@ -22,6 +22,7 @@ return new class extends Migration
             $table->integer('phone_number');
             $table->string('street');
             $table->string('governorate');
+            $table->integer('governorateid');
             $table->string('city_area');
 
             $table->timestamps();

@@ -17,6 +17,8 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
+    // return response()->json([$request->user()->createToken('authToken')->plainTextToken], 200);
 });
 
 Route::post('/login', [AuthenticatedSessionController::class, 'store']);
+Route::post('/logout', [AuthenticatedSessionController::class, 'destroy']);
